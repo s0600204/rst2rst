@@ -1,0 +1,3 @@
+Literals *ought* always be serialized back to their *literal* form. It is
+**important** that literals be **normalized**. The final ``literal`` role is
+``literal``.
