@@ -1,0 +1,5 @@
+
+.. role:: other
+.. role:: custom
+
+A custom inline role may be :custom:`used` like :other:`so`.

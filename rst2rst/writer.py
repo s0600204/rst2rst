@@ -132,6 +132,8 @@ class RSTTranslator(nodes.NodeVisitor):
         self.buffer = []
         self.last_buffer_length = 0
 
+        self.custom_roles = []
+
     # Dynamic properties
 
     @property
@@ -176,6 +178,11 @@ class RSTTranslator(nodes.NodeVisitor):
         """Increase indentation by ``levels`` levels."""
         self._indentation_levels.append(levels)
         self._indent_first_line.append(first_line)
+
+    def register_roles(self, roles):
+        for role in roles:
+            if role not in self.custom_roles:
+                self.custom_roles.append(role)
 
     def render_buffer(self):
         """Append wrapped buffer to body."""
@@ -247,11 +254,28 @@ class RSTTranslator(nodes.NodeVisitor):
         self.spacer = '\n'
         self.list_level -= 1
 
+    def depart_document(self, node):
+        if self.custom_roles:
+            self.custom_roles.sort(reverse=True)
+            self.body[0:0] = ['\n', '\n']
+            for role in self.custom_roles:
+                text = '.. role:: %s\n' % role
+                self.body[1:1] = text
+
     def visit_emphasis(self, node):
         self.write_to_buffer('*')
 
     def depart_emphasis(self, node):
         self.write_to_buffer('*')
+
+    def visit_inline(self, node):
+        classes = node.get('classes', [])
+        self.register_roles(classes)
+        classes = ' '.join(classes)
+        self.write_to_buffer(':%s:`' % classes)
+
+    def depart_inline(self, node):
+        self.write_to_buffer('`')
 
     def visit_list_item(self, node):
         self.body.append(self.spacer)
