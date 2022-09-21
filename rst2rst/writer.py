@@ -129,6 +129,8 @@ class RSTTranslator(nodes.NodeVisitor):
         self.list_level = 0
         """Current level in nested lists."""
 
+        self.buffer = []
+
     # Dynamic properties
 
     @property
@@ -170,6 +172,14 @@ class RSTTranslator(nodes.NodeVisitor):
         self._indentation_levels.append(levels)
         self._indent_first_line.append(first_line)
 
+    def render_buffer(self):
+        """Append wrapped buffer to body."""
+        self.body.append(self.spacer)
+        text = ''.join(self.buffer)
+        text = self.wrap(text) + '\n'
+        self.body.append(text)
+        self.buffer = []
+
     def wrap(self, text, width=None, indent=None):
         """Return ``text`` wrapped to ``width`` and indented with ``indent``.
 
@@ -186,13 +196,15 @@ class RSTTranslator(nodes.NodeVisitor):
                              initial_indent=initial_indent,
                              subsequent_indent=indent)
 
+    def write_to_buffer(self, text):
+        """Delay rendering."""
+        self.buffer.append(text)
+
     # {visit|depart}_* methods
 
     def visit_Text(self, node):
-        self.body.append(self.spacer)
         text = node.astext()
-        text = self.wrap(text)
-        self.body.append(text)
+        self.write_to_buffer(text)
 
     def depart_Text(self, node):
         pass
@@ -239,7 +251,7 @@ class RSTTranslator(nodes.NodeVisitor):
         pass
 
     def depart_paragraph(self, node):
-        self.body.append('\n')
+        self.render_buffer()
         self.spacer = '\n'
         self._indent_first_line[-1] = None
 
@@ -260,8 +272,9 @@ class RSTTranslator(nodes.NodeVisitor):
             self.spacer = ''
 
     def depart_title(self, node):
+        self.render_buffer()
         section_level = self.section_level
         symbol = self.options.title_chars[section_level]
         underline = symbol * len(node.astext())
-        self.body.append('\n' + underline)
+        self.body.append(underline)
         self.spacer = self.options.title_suffix[self.section_level]
