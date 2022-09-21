@@ -234,6 +234,7 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_paragraph(self, node):
         self.body.append('\n')
         self.spacer = '\n'
+        self._indent_first_line[-1] = None
 
     def visit_section(self, node):
         self.section_level += 1
