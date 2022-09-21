@@ -73,14 +73,13 @@ def fixtures_class(cls, bases, attrs):
     return type(cls, bases, attrs)
 
 
-class WriterTestCase(unittest.TestCase):
+class WriterTestCase(unittest.TestCase, metaclass=fixtures_class):
     """Test suite for the rst2rst.writer.Writer class."""
     # Specific metaclass, in order to have one test_* method for each available
     # fixture. Benefits:
     #
     # * Better overview/progress notifications ;
     # * Failure of a fixture does not preclude trying out other fixtures.
-    __metaclass__ = fixtures_class
 
     def get_fixture_dir(self):
         """Return :py:attr:`rst2rst.tests.test_fixtures.FIXTURE_DIR`."""
