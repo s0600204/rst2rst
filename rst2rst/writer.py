@@ -209,6 +209,12 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_Text(self, node):
         pass
 
+    def visit_abbreviation(self, node):
+        self.write_to_buffer(':abbreviation:`')
+
+    def depart_abbreviation(self, node):
+        self.write_to_buffer('`')
+
     def visit_block_quote(self, node):
         self.indent(self.options.blockquote_indent)
 
