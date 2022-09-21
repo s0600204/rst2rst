@@ -21,7 +21,7 @@ def fixture_names(fixture_dir=FIXTURE_DIR):
     """Return list of fixture names.
 
     By default, ``fixtures_dir`` is
-    :py:attr:`rst2rst.tests.test_fixtures.FIXTURE_DIR`.
+    :py:attr:`tests.FIXTURE_DIR`.
 
     Fixture names are computed from filenames in ``fixture_dir``.
 
@@ -82,7 +82,7 @@ class WriterTestCase(unittest.TestCase, metaclass=fixtures_class):
     # * Failure of a fixture does not preclude trying out other fixtures.
 
     def get_fixture_dir(self):
-        """Return :py:attr:`rst2rst.tests.test_fixtures.FIXTURE_DIR`."""
+        """Return :py:attr:`tests.FIXTURE_DIR`."""
         return FIXTURE_DIR
 
     def fixture_paths(self, name):

@@ -23,6 +23,12 @@ import platform             # noqa: E402
 
 import docutils             # noqa: E402
 
+# Import rst2rst from local copy, not from an install
+testroot = os.path.abspath(os.path.dirname(__file__) or os.curdir)
+sys.path.insert(0, os.path.normpath(os.path.join(testroot, '..')))
+
+import rst2rst
+
 
 class Tee:
 
@@ -87,14 +93,15 @@ import package_unittest  # noqa
 
 if __name__ == '__main__':
     suite = suite()
-    print('Testing Docutils %s with Python %s on %s at %s' % (
-        docutils.__version__, sys.version.split()[0],
+    print('Testing rst2rst %s with Python %s on %s at %s' % (
+        rst2rst.__version__, sys.version.split()[0],
         time.strftime('%Y-%m-%d'), time.strftime('%H:%M:%S')))
     print('OS: %s %s %s (%s, %s)' % (
         platform.system(), platform.release(), platform.version(),
         sys.platform, platform.platform()))
     print('Working directory: %s' % os.getcwd())
     print('Docutils package: %s' % os.path.dirname(docutils.__file__))
+    print('rst2rst package: %s' % os.path.dirname(rst2rst.__file__))
     sys.stdout.flush()
     result = package_unittest.main(suite)
     finish = time.time()
