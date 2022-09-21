@@ -226,6 +226,12 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_abbreviation(self, node):
         self.write_to_buffer('`')
 
+    def visit_acronym(self, node):
+        self.write_to_buffer(':acronym:`')
+
+    def depart_acronym(self, node):
+        self.write_to_buffer('`')
+
     def visit_block_quote(self, node):
         self.indent(self.options.blockquote_indent)
 
@@ -278,6 +284,12 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_literal(self, node):
         self.write_to_buffer('``')
 
+    def visit_math(self, node):
+        self.write_to_buffer(':math:`')
+
+    def depart_math(self, node):
+        self.write_to_buffer('`')
+
     def visit_paragraph(self, node):
         pass
 
@@ -285,6 +297,34 @@ class RSTTranslator(nodes.NodeVisitor):
         self.render_buffer()
         self.spacer = '\n'
         self._indent_first_line[-1] = None
+
+    def visit_reference(self, node):
+        """
+        The uri prefixes are taken from ``docutils.parsers.rst.__init__.py``,
+        specifically the ``--pep-base-url`` and ``--rfc-base-url`` settings.
+
+        Ideally we'd read from the same options, instead of hardcoding them here.
+        """
+        # @todo: The above, along with removing the magic numbers associated below.
+        refuri = node.get('refuri')
+
+        pep_uri = 'https://peps.python.org/'
+        if refuri.startswith(pep_uri):
+            pep_num = refuri[len(pep_uri) + 4:]
+            self.write_to_buffer(':pep-reference:`%s`' % pep_num)
+            raise nodes.SkipNode
+
+        rfc_uri = 'https://tools.ietf.org/html/'
+        if refuri.startswith(rfc_uri):
+            rfc_num = refuri[len(rfc_uri) + 3:-5]
+            self.write_to_buffer(':rfc-reference:`%s`' % rfc_num)
+            raise nodes.SkipNode
+
+        # @todo: Save the reference uris so they can be enumerated in the footer or something.
+        self.write_to_buffer(':ref:`')
+
+    def depart_reference(self, node):
+        self.write_to_buffer('`')
 
     def visit_section(self, node):
         self.section_level += 1
@@ -297,6 +337,18 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_strong(self, node):
         self.write_to_buffer('**')
+
+    def visit_subscript(self, node):
+        self.write_to_buffer(':subscript:`')
+
+    def depart_subscript(self, node):
+        self.write_to_buffer('`')
+
+    def visit_superscript(self, node):
+        self.write_to_buffer(':superscript:`')
+
+    def depart_superscript(self, node):
+        self.write_to_buffer('`')
 
     def visit_title(self, node):
         pass
@@ -312,3 +364,9 @@ class RSTTranslator(nodes.NodeVisitor):
         self.render_buffer()
         self.render_title_line(self.section_level, text_length)
         self.spacer = self.options.title_suffix[self.section_level]
+
+    def visit_title_reference(self, node):
+        self.write_to_buffer(':title-reference:`')
+
+    def depart_title_reference(self, node):
+        self.write_to_buffer('`')

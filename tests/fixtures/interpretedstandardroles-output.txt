@@ -1,0 +1,22 @@
+Docutils' implementation of reStructuredText comes with various interpreted
+text roles as standard. These are:
+
+* Abbreviations: for instance, :abbreviation:`RST` is the abbreviation for
+  reStructuredText.
+
+* Acronyms: :acronym:`RIV` could be the acronym for "reStructuredText is
+  versatile".
+
+* Code may be specified ``import docutils``, although without any custom
+  modification it results in the same as ``literal``.
+
+* Emphasis: *emphasis*.
+* Literal: ``literal``.
+* Math: e.g. the area of a circle is :math:`A_\text{c} = (\pi/4) d^2`.
+* PEP-reference: e.g. :pep-reference:`0008`
+* RFC-reference: e.g. :rfc-reference:`5545`.
+* Strong: **some strong text**.
+* Subscript: :subscript:`Down Low`.
+* Superscript: :superscript:`up high`.
+* Title-reference: :title-reference:`This text is the name of a published
+  work`.

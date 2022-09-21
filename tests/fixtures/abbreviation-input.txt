@@ -1,2 +1,0 @@
-Abbreviations are interpreted text roles. :abbreviation:`RST` is the
-abbreviation for reStructuredText.
