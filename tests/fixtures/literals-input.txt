@@ -1,0 +1,8 @@
+Literals *ought* always be serialized back to their
+:emphasis:`literal` form. It is **important** that literals be
+:strong:`normalized`. The final ``literal`` role is
+:literal:`literal`.
+
+*Nesting inlines is :strong:`not` valid*.
+
+Escapes should *\*remain\**.

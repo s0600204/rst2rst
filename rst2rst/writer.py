@@ -284,3 +284,21 @@ class RSTTranslator(nodes.NodeVisitor):
         underline = symbol * len(node.astext())
         self.body.append(underline)
         self.spacer = self.options.title_suffix[self.section_level]
+
+    def visit_emphasis(self, node):
+        self.body.append('*')
+        self.body.append(node.astext().replace('*', r'\*'))
+        self.body.append('*')
+        raise nodes.SkipNode
+
+    def visit_strong(self, node):
+        self.body.append('**')
+        self.body.append(node.astext().replace('*', r'\*'))
+        self.body.append('**')
+        raise nodes.SkipNode
+
+    def visit_literal(self, node):
+        self.body.append('``')
+        self.body.append(node.astext())
+        self.body.append('``')
+        raise nodes.SkipNode
