@@ -24,7 +24,10 @@ class PEP396TestCase(unittest.TestCase):
         except ImportError:
             self.fail('Cannot import pkg_resources module. It is part of '
                       'setuptools, which is a dependency of rst2rst.')
-        installed_version = pkg_resources.get_distribution('rst2rst').version
+        try:
+            installed_version = pkg_resources.get_distribution('rst2rst').version
+        except pkg_resources.DistributionNotFound:
+            self.skipTest('Test requires rst2rst to be installed on system.')
         self.assertEqual(installed_version, self.get_version(),
                          'Version mismatch: version.txt tells "%s" whereas '
                          'pkg_resources tells "%s". '
