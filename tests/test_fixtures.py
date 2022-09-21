@@ -108,7 +108,7 @@ class WriterTestCase(unittest.TestCase, metaclass=fixtures_class):
 
         """
         input_str = open(source).read()
-        real = publish_string(source=input_str, writer_name='rst2rst')
+        real = publish_string(source=input_str, writer_name='rst2rst', settings_overrides={'output_encoding': 'unicode'})
         expected = open(reference).read()
         if real != expected:
             # Report error with a diff.
