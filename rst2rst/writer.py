@@ -129,10 +129,21 @@ class RSTTranslator(nodes.NodeVisitor):
         self.list_level = 0
         """Current level in nested lists."""
 
+    # Dynamic properties
+
+    @property
+    def bullet_character(self):
+        return self.options.bullet_character[self.list_level]
+
     @property
     def indentation(self):
         """Return current indentation as unicode."""
         return self.options.indentation_char * sum(self._indentation_levels)
+
+    @property
+    def indentation_level(self):
+        """Return current indentation level."""
+        return self._indentation_levels[-1]
 
     @property
     def initial_indentation(self):
@@ -142,25 +153,22 @@ class RSTTranslator(nodes.NodeVisitor):
         else:
             return self._indent_first_line[-1]
 
-    @property
-    def indentation_level(self):
-        """Return current indentation level."""
-        return self._indentation_levels[-1]
+    # Helper methods
 
-    def indent(self, levels, first_line=None):
-        """Increase indentation by ``levels`` levels."""
-        self._indentation_levels.append(levels)
-        self._indent_first_line.append(first_line)
+    def astext(self):
+        content = self.header + self.title + self.subtitle + self.body \
+            + self.footer
+        return ''.join(content)
 
     def dedent(self):
         """Decrease indentation by ``levels`` levels."""
         self._indent_first_line.pop()
         return self._indentation_levels.pop()
 
-    def astext(self):
-        content = self.header + self.title + self.subtitle + self.body \
-            + self.footer
-        return ''.join(content)
+    def indent(self, levels, first_line=None):
+        """Increase indentation by ``levels`` levels."""
+        self._indentation_levels.append(levels)
+        self._indent_first_line.append(first_line)
 
     def wrap(self, text, width=None, indent=None):
         """Return ``text`` wrapped to ``width`` and indented with ``indent``.
@@ -178,6 +186,8 @@ class RSTTranslator(nodes.NodeVisitor):
                              initial_indent=initial_indent,
                              subsequent_indent=indent)
 
+    # {visit|depart}_* methods
+
     def visit_Text(self, node):
         self.body.append(self.spacer)
         text = node.astext()
@@ -187,17 +197,11 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_Text(self, node):
         pass
 
-    # Blockquotes.
-
     def visit_block_quote(self, node):
         self.indent(self.options.blockquote_indent)
 
     def depart_block_quote(self, node):
         self.dedent()
-
-    # END blockquotes.
-
-    # Lists (bullets, enumerated...)
 
     def visit_bullet_list(self, node):
         self.body.append(self.spacer)
@@ -230,12 +234,6 @@ class RSTTranslator(nodes.NodeVisitor):
             self.spacer = '\n'
         else:
             self.spacer = ''
-
-    @property
-    def bullet_character(self):
-        return self.options.bullet_character[self.list_level]
-
-    # END lists (bullets, enumerated...)
 
     def visit_paragraph(self, node):
         pass
