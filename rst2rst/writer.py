@@ -130,6 +130,7 @@ class RSTTranslator(nodes.NodeVisitor):
         """Current level in nested lists."""
 
         self.buffer = []
+        self.last_buffer_length = 0
 
     # Dynamic properties
 
@@ -180,6 +181,7 @@ class RSTTranslator(nodes.NodeVisitor):
         """Append wrapped buffer to body."""
         self.body.append(self.spacer)
         text = ''.join(self.buffer)
+        self.last_buffer_length = len(text)
         text = self.wrap(text) + '\n'
         self.body.append(text)
         self.buffer = []
@@ -252,7 +254,8 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_list_item(self, node):
         self.dedent()
-        # Only space out list-items if their text is longer than the wrap length
+        # Only space out list-items if the text in their final paragraph is
+        # longer than the wrap length.
         #
         # Note: this will result in
         # > * Short line.
@@ -262,8 +265,9 @@ class RSTTranslator(nodes.NodeVisitor):
         # > * Short line.
         # which doesn't look very good IMO.
         #
-        # @todo: Work out a way of doing this for *all* items if one line is long.
-        if len(node.astext()) > self.options.wrap_length:
+        # @todo: Work out a way of doing this for *all* items if one item in the
+        #        list is too long.
+        if self.last_buffer_length > self.options.wrap_length:
             self.spacer = '\n'
         else:
             self.spacer = ''
