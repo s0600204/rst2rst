@@ -46,9 +46,20 @@ class LazyString(object):
         """Equality operator."""
         return str(self) == other
 
-    def __cmp__(self, other):
-        """Comparison operator."""
-        return cmp(str(self), other)
+    def __ge__(self, other):
+        return str(self) >= other
+
+    def __gt__(self, other):
+        return str(self) > other
+
+    def __le__(self, other):
+        return str(self) <= other
+
+    def __lt__(self, other):
+        return str(self) < other
+
+    def __ne__(self, other):
+        return str(self) != other
 
 
 def read_relative_file(filename, relative_to=None):
