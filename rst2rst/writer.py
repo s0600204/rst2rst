@@ -31,7 +31,7 @@ class Options(object):
 
         """
 
-        self.title_suffix = [u'\n\n'] * 6
+        self.title_suffix = [u'\n'] * 6
         """List of suffixes after title and underline (typically, blank lines).
 
         Indices represent heading level.
@@ -134,6 +134,10 @@ class RSTTranslator(nodes.NodeVisitor):
     # Dynamic properties
 
     @property
+    def buffer_length(self):
+        return len(''.join(self.buffer))
+
+    @property
     def bullet_character(self):
         return self.options.bullet_character[self.list_level]
 
@@ -179,6 +183,11 @@ class RSTTranslator(nodes.NodeVisitor):
         text = self.wrap(text) + '\n'
         self.body.append(text)
         self.buffer = []
+
+    def render_title_line(self, section_level, length):
+        symbol = self.options.title_chars[section_level]
+        self.body.append(symbol * length)
+        self.body.append('\n')
 
     def wrap(self, text, width=None, indent=None):
         """Return ``text`` wrapped to ``width`` and indented with ``indent``.
@@ -286,19 +295,16 @@ class RSTTranslator(nodes.NodeVisitor):
         self.write_to_buffer('**')
 
     def visit_title(self, node):
+        pass
+
+    def depart_title(self, node):
+        text_length = self.buffer_length
         self.body.append(self.options.title_prefix[self.section_level])
         is_overlined = self.options.title_overline[self.section_level]
         if is_overlined:
             self.body.append(self.spacer)
-            symbol = self.options.title_chars[self.section_level]
-            overline = symbol * len(node.astext())
-            self.body.append(overline + '\n')
+            self.render_title_line(self.section_level, text_length)
             self.spacer = ''
-
-    def depart_title(self, node):
         self.render_buffer()
-        section_level = self.section_level
-        symbol = self.options.title_chars[section_level]
-        underline = symbol * len(node.astext())
-        self.body.append(underline)
+        self.render_title_line(self.section_level, text_length)
         self.spacer = self.options.title_suffix[self.section_level]

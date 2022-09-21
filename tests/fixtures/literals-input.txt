@@ -5,4 +5,8 @@ Literals *ought* always be serialized back to their
 
 *Nesting inlines is :strong:`not` valid*.
 
+************************************
+A *title* may have :strong:`inlines`
+************************************
+
 Escapes should *\*remain\**.
