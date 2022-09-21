@@ -11,3 +11,6 @@
 
 # Editor(s) temporary files.
 .*.swp
+
+# Test output
+/tests/alltests.out
