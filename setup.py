@@ -15,7 +15,7 @@ NAME = 'rst2rst'
 README = read_relative_file('README.rst')
 VERSION = read_relative_file(os.path.join(NAME, 'version.txt')).strip()
 PACKAGES = [NAME]
-REQUIRES = ['setuptools', 'docutils']
+REQUIRES = ['setuptools', 'docutils>=0.9']
 ENTRY_POINTS = {
     'console_scripts': [
         'rst2rst = rst2rst.scripts.rst2rst:main',
