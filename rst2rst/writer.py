@@ -215,12 +215,27 @@ class RSTTranslator(nodes.NodeVisitor):
         self.list_level -= 1
 
     def visit_list_item(self, node):
+        self.body.append(self.spacer)
         self.indent(2, '%s%s ' % (self.indentation, self.bullet_character))
         self.spacer = ''
 
     def depart_list_item(self, node):
         self.dedent()
-        self.spacer = '\n  '
+        # Only space out list-items if their text is longer than the wrap length
+        #
+        # Note: this will result in
+        # > * Short line.
+        # > * Loooonnnnnng line that wraps
+        # >   onto a second line.
+        # >
+        # > * Short line.
+        # which doesn't look very good IMO.
+        #
+        # @todo: Work out a way of doing this for *all* items if one line is long.
+        if len(node.astext()) > self.options.wrap_length:
+            self.spacer = '\n'
+        else:
+            self.spacer = ''
 
     @property
     def bullet_character(self):
