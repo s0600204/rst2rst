@@ -203,7 +203,7 @@ class RSTTranslator(nodes.NodeVisitor):
     # {visit|depart}_* methods
 
     def visit_Text(self, node):
-        text = node.astext()
+        text = node.astext().replace('*', r'\*')
         self.write_to_buffer(text)
 
     def depart_Text(self, node):
@@ -230,6 +230,12 @@ class RSTTranslator(nodes.NodeVisitor):
         self.spacer = '\n'
         self.list_level -= 1
 
+    def visit_emphasis(self, node):
+        self.write_to_buffer('*')
+
+    def depart_emphasis(self, node):
+        self.write_to_buffer('*')
+
     def visit_list_item(self, node):
         self.body.append(self.spacer)
         self.indent(2, '%s%s ' % (self.indentation, self.bullet_character))
@@ -253,6 +259,12 @@ class RSTTranslator(nodes.NodeVisitor):
         else:
             self.spacer = ''
 
+    def visit_literal(self, node):
+        self.write_to_buffer('``')
+
+    def depart_literal(self, node):
+        self.write_to_buffer('``')
+
     def visit_paragraph(self, node):
         pass
 
@@ -266,6 +278,12 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_section(self, node):
         self.section_level -= 1
+
+    def visit_strong(self, node):
+        self.write_to_buffer('**')
+
+    def depart_strong(self, node):
+        self.write_to_buffer('**')
 
     def visit_title(self, node):
         self.body.append(self.options.title_prefix[self.section_level])
@@ -284,21 +302,3 @@ class RSTTranslator(nodes.NodeVisitor):
         underline = symbol * len(node.astext())
         self.body.append(underline)
         self.spacer = self.options.title_suffix[self.section_level]
-
-    def visit_emphasis(self, node):
-        self.body.append('*')
-        self.body.append(node.astext().replace('*', r'\*'))
-        self.body.append('*')
-        raise nodes.SkipNode
-
-    def visit_strong(self, node):
-        self.body.append('**')
-        self.body.append(node.astext().replace('*', r'\*'))
-        self.body.append('**')
-        raise nodes.SkipNode
-
-    def visit_literal(self, node):
-        self.body.append('``')
-        self.body.append(node.astext())
-        self.body.append('``')
-        raise nodes.SkipNode
