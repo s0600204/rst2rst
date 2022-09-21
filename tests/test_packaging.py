@@ -29,8 +29,6 @@ class PEP396TestCase(unittest.TestCase):
         except pkg_resources.DistributionNotFound:
             self.skipTest('Test requires rst2rst to be installed on system.')
         self.assertEqual(installed_version, self.get_version(),
-                         'Version mismatch: version.txt tells "%s" whereas '
-                         'pkg_resources tells "%s". '
-                         'YOU MAY NEED TO RUN ``make update`` to update the '
-                         'installed version in development environment.'
+                         'Version mismatch: the version being tested (%s) doesn\'t match'
+                         'the one installed on the system (%s).'
                          % (self.get_version(), installed_version))
