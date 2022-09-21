@@ -12,6 +12,15 @@ The project was initiated as an utility for a `style guide for Sphinx-based
 documentations`_. See also the `original ticket`_.
 
 
+*******
+Testing
+*******
+
+To run tests, navigate to the tests subdirectory and run::
+
+  python -u alltests.py
+
+
 **********
 Ressources
 **********
