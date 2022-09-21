@@ -1,0 +1,17 @@
+reStructuredText supports definition lists.
+
+Alfa
+  This first entry has a term, and a definition with a single paragraph.
+
+Baker : Charlie
+  This second entry has a term, a classification, and a definition with a single paragraph that should be wrapped.
+
+Delta
+  This entry has a term, no classifier...
+
+  But more than one paragraph in its definition.
+
+**Echo** : *Foxtrot*
+  This entry has inline formatting in its **term**, *classifier*, and ``definition``.
+
+And here ends the definition list.

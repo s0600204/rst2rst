@@ -254,6 +254,33 @@ class RSTTranslator(nodes.NodeVisitor):
         self.spacer = '\n'
         self.list_level -= 1
 
+    def visit_classifier(self, node):
+        self.write_to_buffer(' : ')
+
+    def depart_classifier(self, node):
+        pass
+
+    def visit_definition(self, node):
+        self.render_buffer()
+        self.spacer = ''
+        self.indent(2)
+
+    def depart_definition(self, node):
+        self.dedent()
+
+    def visit_definition_list(self, node):
+        self.list_level += 1
+        self.spacer = '\n'
+
+    def depart_definition_list(self, node):
+        self.list_level -= 1
+
+    def visit_definition_list_item(self, node):
+        pass
+
+    def depart_definition_list_item(self, node):
+        pass
+
     def depart_document(self, node):
         if self.custom_roles:
             self.custom_roles.sort(reverse=True)
@@ -373,6 +400,12 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_superscript(self, node):
         self.write_to_buffer('`')
+
+    def visit_term(self, node):
+        pass
+
+    def depart_term(self, node):
+        pass
 
     def visit_title(self, node):
         pass
