@@ -1,0 +1,47 @@
+name: Test Runner (tox)
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  tox:
+    name: Test with tox
+    runs-on: ubuntu-latest
+
+    env:
+      # 3.5.3 and below :: require OpenSSL 1.0; won't build with anything more recent
+      PYTHON_VERSIONS: >
+        3.11.0a7,
+        3.9.12,
+        3.8.13,
+        3.7.13,
+        3.6.15,
+        3.5.10,
+      # Despite it being documented as "optional", we need to specify a default python version.
+      DEFAULT_PYTHON: 3.10.4
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup pyenv
+      uses: "gabrielfalcao/pyenv-action@v10"
+      with:
+        versions: ${{ env.PYTHON_VERSIONS }}
+        default: ${{ env.DEFAULT_PYTHON }}
+        command: pip install -U pip
+
+    - name: Install tox
+      run: |
+        pip install tox
+
+    - name: Run tox
+      env:
+        TOX_PARALLEL_NO_SPINNER: 1
+      run: |
+        pyenv local $DEFAULT_PYTHON `echo $PYTHON_VERSIONS | tr -d ','`
+        tox --parallel
