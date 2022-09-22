@@ -21,7 +21,6 @@ import atexit               # noqa: E402
 import os                   # noqa: E402
 import platform             # noqa: E402
 
-import DocutilsTestSupport  # noqa: E402 must be imported before docutils
 import docutils             # noqa: E402
 
 
@@ -74,7 +73,7 @@ def pformat(suite):
 
 def suite():
     path, script = os.path.split(sys.argv[0])
-    suite = package_unittest.loadTestModules(DocutilsTestSupport.testroot,
+    suite = package_unittest.loadTestModules(os.path.abspath(os.path.dirname(__file__) or os.curdir),
                                              'test_', packages=1)
     sys.stdout.flush()
     return suite

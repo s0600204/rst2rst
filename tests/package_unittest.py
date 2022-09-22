@@ -103,7 +103,7 @@ def loadTestModules(path, name='', packages=None):
         try:
             module = import_module(mod)
         except ImportError:
-            print(f"ERROR: Can't import {mod}, skipping its tests:",
+            print("ERROR: Can't import %s, skipping its tests:" % mod,
                   file=sys.stderr)
             sys.excepthook(*sys.exc_info())
         else:
