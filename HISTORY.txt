@@ -2,6 +2,11 @@
 Changelog for rst2rst
 #####################
 
+0.4 (In development)
+====================
+
+- Nothing so far
+
 
 0.3 (Never released)
 ====================
