@@ -6,6 +6,7 @@ import textwrap
 
 import docutils
 from docutils import frontend, nodes, utils, writers, languages, io
+from docutils.parsers.rst.states import Inliner
 from docutils.transforms import writer_aux
 from docutils.utils.error_reporting import SafeString
 from docutils.utils.math import unichar2tex, pick_math_environment
@@ -350,24 +351,22 @@ class RSTTranslator(nodes.NodeVisitor):
         self._indent_first_line[-1] = None
 
     def visit_reference(self, node):
-        """
-        The uri prefixes are taken from ``docutils.parsers.rst.__init__.py``,
-        specifically the ``--pep-base-url`` and ``--rfc-base-url`` settings.
-
-        Ideally we'd read from the same options, instead of hardcoding them here.
-        """
-        # @todo: The above, along with removing the magic numbers associated below.
         refuri = node.get('refuri')
 
-        pep_uri = 'https://peps.python.org/'
+        pep_uri = self.document.settings.pep_base_url
         if refuri.startswith(pep_uri):
-            pep_num = refuri[len(pep_uri) + 4:]
+            pep_template = self.document.settings.pep_file_url_template
+            pep_num = refuri[len(pep_uri) + pep_template.index('%'):]
             self.write_to_buffer(':pep-reference:`%s`' % pep_num)
             raise nodes.SkipNode
 
-        rfc_uri = 'https://tools.ietf.org/html/'
+        rfc_uri = self.document.settings.rfc_base_url
         if refuri.startswith(rfc_uri):
-            rfc_num = refuri[len(rfc_uri) + 3:-5]
+            rfc_template = Inliner.rfc_url
+            rfc_num = refuri[
+                len(rfc_uri) + rfc_template.index('%'):
+                -(len(rfc_template) - rfc_template.index('.'))
+            ]
             self.write_to_buffer(':rfc-reference:`%s`' % rfc_num)
             raise nodes.SkipNode
 
