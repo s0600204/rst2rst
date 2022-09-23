@@ -3,10 +3,14 @@ Changelog for rst2rst
 #####################
 
 
-0.3 (unreleased)
-================
+0.3 (Never released)
+====================
 
-- Nothing changed yet.
+- Return version via ``rst2rst.__version__`` in accordance with :PEP:`396`.
+- Expand and refactor tests.
+- Improve text wrapping.
+- Improve support for bullet lists.
+- Support ``docutils`` versions ``0.10`` and later.
 
 
 0.2 (2012-06-14)
@@ -18,6 +22,6 @@ Changelog for rst2rst
 0.1 (2012-06-13)
 ================
 
-- Proof of concept realease.
-- Partial implementation of a docutils writer that produces RST output.
+- Proof of concept release.
+- Partial implementation of a ``docutils`` writer that produces RST output.
 - Introduced development material such as tests and releaser.
