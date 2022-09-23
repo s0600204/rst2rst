@@ -2,10 +2,15 @@
 Changelog for rst2rst
 #####################
 
-0.4 (In development)
+0.4 (Never released)
 ====================
 
-- Nothing so far
+- Update test methodology to match that of ``docutils`` itself.
+- Can now run tests against multiple versions of ``python`` and ``docutils``
+  at once using ``tox``.
+- Added automated testing workflows for use with GitHub Actions.
+- Removed Travis CI workflow.
+- We now require ``python 3.5.4`` or better; and ``docutils 0.10`` or better.
 
 
 0.3 (Never released)
