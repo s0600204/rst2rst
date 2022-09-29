@@ -1,5 +1,9 @@
-
 .. role:: custom
 .. role:: other
+.. role:: python(code)
+  :language: php
 
 A custom inline role may be :custom:`used` like :other:`so`.
+
+A custom code-inline may be done like :python:`Write-Output('PRINT "Hello,
+World!"')`.

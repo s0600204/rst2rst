@@ -135,6 +135,7 @@ class RSTTranslator(nodes.NodeVisitor):
         self.last_buffer_length = 0
 
         self.custom_roles = []
+        self.ignore_inlines = False
 
     # Dynamic properties
 
@@ -181,12 +182,17 @@ class RSTTranslator(nodes.NodeVisitor):
         self._indentation_levels.append(levels)
         self._indent_first_line.append(first_line)
 
-    def register_role(self, role):
+    def register_role(self, role, options={}):
         if role in self.custom_roles:
             return
         self.custom_roles.append(role)
 
         text = '.. role:: %s\n' % role
+        if options:
+            self.indent(2)
+            for option in options:
+                text += '%s:%s: %s\n' % (self.indentation, option, options[option])
+            self.dedent()
         self.roles.append(text)
 
     def render_buffer(self):
@@ -297,6 +303,8 @@ class RSTTranslator(nodes.NodeVisitor):
         self.write_to_buffer('*')
 
     def visit_inline(self, node):
+        if self.ignore_inlines:
+            return
         classes = node.get('classes', [])
         for role in classes:
             self.register_role(role)
@@ -304,6 +312,8 @@ class RSTTranslator(nodes.NodeVisitor):
         self.write_to_buffer(':%s:`' % classes)
 
     def depart_inline(self, node):
+        if self.ignore_inlines:
+            return
         self.write_to_buffer('`')
 
     def visit_list_item(self, node):
@@ -332,10 +342,24 @@ class RSTTranslator(nodes.NodeVisitor):
             self.spacer = ''
 
     def visit_literal(self, node):
-        self.write_to_buffer('``')
+        classes = node.get('classes', [])
+        if classes and len(classes) > 1:
+            options = {}
+            if len(classes) == 3:
+                options['language'] = classes[2]
+            self.register_role('%s(code)' % classes[1], options)
+            self.write_to_buffer(':%s:`' % classes[1])
+            self.ignore_inlines = True
+        else:
+            self.write_to_buffer('``')
 
     def depart_literal(self, node):
-        self.write_to_buffer('``')
+        classes = node.get('classes', [])
+        if classes and len(classes) > 1:
+            self.write_to_buffer('`')
+            self.ignore_inlines = False
+        else:
+            self.write_to_buffer('``')
 
     def visit_literal_block(self, node):
         # @todo: Support parsed-literal blocks
