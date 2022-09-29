@@ -8,6 +8,7 @@ import docutils
 from docutils import frontend, nodes, utils, writers, languages, io
 from docutils.parsers.rst.states import Inliner
 from docutils.transforms import writer_aux
+from docutils.utils import roman
 from docutils.utils.error_reporting import SafeString
 from docutils.utils.math import unichar2tex, pick_math_environment
 from docutils.utils.math.latex2mathml import parse_latex_math
@@ -128,8 +129,23 @@ class RSTTranslator(nodes.NodeVisitor):
 
         """
 
-        self.list_level = 0
-        """Current level in nested lists."""
+        self.list_style_stack = []
+        """Stack of the styles to use for bullets or enumeration.
+
+        For bullets, this is a suitable single character to use.
+
+        For enumerations, this is an array containing the enumeration type,
+        the prefix, the suffix, and a running count.
+
+        Also used to determine the current level in nested lists.
+        """
+
+        self.list_finished = False
+        """Signals that a list has finished.
+
+        Currently only used to permit adding a newline between the last entry
+        of a list and the next entry of its parent list.
+        """
 
         self.buffer = []
         self.last_buffer_length = 0
@@ -145,7 +161,7 @@ class RSTTranslator(nodes.NodeVisitor):
 
     @property
     def bullet_character(self):
-        return self.options.bullet_character[self.list_level]
+        return self.options.bullet_character[len(self.list_style_stack)]
 
     @property
     def indentation(self):
@@ -258,12 +274,14 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def visit_bullet_list(self, node):
         self.body.append(self.spacer)
-        self.list_level += 1
+        self.list_finished = False
+        self.list_style_stack.append(self.bullet_character)
         self.spacer = ''
 
     def depart_bullet_list(self, node):
+        self.list_style_stack.pop()
+        self.list_finished = True
         self.spacer = '\n'
-        self.list_level -= 1
 
     def visit_classifier(self, node):
         self.write_to_buffer(' : ')
@@ -280,11 +298,10 @@ class RSTTranslator(nodes.NodeVisitor):
         self.dedent()
 
     def visit_definition_list(self, node):
-        self.list_level += 1
         self.spacer = '\n'
 
     def depart_definition_list(self, node):
-        self.list_level -= 1
+        pass
 
     def visit_definition_list_item(self, node):
         pass
@@ -302,6 +319,22 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_emphasis(self, node):
         self.write_to_buffer('*')
 
+    def visit_enumerated_list(self, node):
+        self.body.append(self.spacer)
+        self.list_finished = False
+        self.list_style_stack.append([
+            node.get('enumtype'),
+            node.get('prefix'),
+            node.get('suffix'),
+            0
+        ])
+        self.spacer = ''
+
+    def depart_enumerated_list(self, node):
+        self.list_style_stack.pop()
+        self.list_finished = True
+        self.spacer = '\n'
+
     def visit_inline(self, node):
         if self.ignore_inlines:
             return
@@ -318,7 +351,31 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def visit_list_item(self, node):
         self.body.append(self.spacer)
-        self.indent(2, '%s%s ' % (self.indentation, self.bullet_character))
+        if self.list_finished:
+            # Add a newline between the end of a list
+            # and the next entry in its parent list.
+            self.body.append('\n')
+            self.list_finished = False
+
+        style = self.list_style_stack[-1]
+        if isinstance(style, str):
+            indent = 2
+            point = style
+        else:
+            self.list_style_stack[-1][3] += 1
+            indent = 3
+            point = style[3]
+            if style[0].endswith('alpha'):
+                point = chr(point + ord('a') - 1)
+            elif style[0].endswith('roman'):
+                point = roman.toRoman(point)
+
+            if style[0].startswith('upper'):
+                point = point.upper()
+
+            point = "%s%s%s" % (style[1], point, style[2])
+
+        self.indent(indent, '%s%s ' % (self.indentation, point))
         self.spacer = ''
 
     def depart_list_item(self, node):
@@ -391,7 +448,14 @@ class RSTTranslator(nodes.NodeVisitor):
         self.write_to_buffer('`')
 
     def visit_paragraph(self, node):
-        pass
+        text = node.astext()
+        if len(text) > 1 and text[1] == '.' and text[0].isalpha():
+            # Special case for things like the following, which shouldn't be
+            # output in a way it can be misconstrued as a single-item list::
+            #
+            #   A. Einstein is a genius!
+            #
+            self.write_to_buffer('\\')
 
     def depart_paragraph(self, node):
         self.render_buffer()

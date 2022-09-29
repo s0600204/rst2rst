@@ -1,0 +1,170 @@
+################
+Enumerated lists
+################
+
+In reStructuredText specification, there is no strict convention about enumerated lists.
+
+
+*****************
+Bullet characters
+*****************
+
+You can use a variety of characters as first-level identifiers.
+
+Numbers are recognised:
+
+1. first item.
+2. second item.
+
+Letters are also recognized:
+
+A. first item.
+B. second item.
+
+Roman Numbering is also possible:
+
+I.   first item,
+II.  second item,
+III. third,
+IV.  fourth,
+V.   and so on...
+
+This applies to nested lists too.
+
+1. Numeric
+
+  A. Alphabetic
+
+... means the same as:
+
+A. Alphabetic
+
+  1. Numeric
+
+... and, oddly enough:
+
+1. Numeric
+
+A. Alphabetic, seen as a seperate list due to the different type.
+
+
+***********
+Indentation
+***********
+
+reStructuredText specification permits various indentation.
+
+1. 1 space between number and text is valid.
+
+And,
+
+2.  2 spaces between number and text is valid too.
+
+And,
+
+3.   3 spaces between number and text is valid too. The more spaces, the less
+     readable.
+
+And,
+
+42.                                          numbers indented with an exotic
+                                             number of spaces (as an example,
+                                             42 spaces) is still valid!
+
+As a result,
+
+1.       You can have 1st level content
+
+  A.     Where text is left aligned with content of 2nd level blocks
+
+    (1)  or
+
+      a. more... It doesn't improve document's readability.
+
+
+*******
+Spacing
+*******
+
+You can use an arbitrary number of empty lines between each list item.
+
+1. Zero empty lines,
+2. One empty line,
+
+3. Two empty lines,
+
+
+4. Or more,
+
+
+
+
+
+
+
+
+
+
+5. ... the number list is valid.
+
+Moreover,
+
+A. when several list items span over multiple lines, it becomes quite difficult
+   to visually identify the paragraphs if there is no space, or no consistent
+   spacing. In order to illustrate this, let's generate some long sentences...
+B. One two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+C. Two two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+D. Three two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+E. Four two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+
+   Five two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+F. Six two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+
+G. Seven two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+H. Eight two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+I. Nine two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+
+J. Ten two three four five six seven eight nine ten eleven twelve thirteen one
+   fourteen two fifteen three sixteen four seventeen five eighteen six nineteen
+   seven twenty one two three four five six seven eight nine ten eleven twelve
+   thirteen one fourteen two fifteen three sixteen four seventeen five eighteen
+
+*******
+Gotchas
+*******
+
+The following are not lists, and should be escaped as necessary.
+
+A. Einstein was a really
+smart dude.
+
+(filler text)
+
+\A. Einstein was a really smart dude.

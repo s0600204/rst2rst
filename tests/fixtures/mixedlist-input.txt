@@ -1,0 +1,17 @@
+
+1. A list that starts out as numbered;
+2. And a second point here;
+
+   * But changes to a bullet list;
+   * For a couple of points;
+
+3. Then back to the numbers
+
+   - Then bulleted
+   - And again,
+
+     (A) With a different enumeration here
+     (B) And again...
+     (C) And let's have a third entry here!
+
+4. And back to the original numbers, a transition of two levels
