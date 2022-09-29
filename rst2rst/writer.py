@@ -94,6 +94,7 @@ class RSTTranslator(nodes.NodeVisitor):
         self.header = []
         self.title = []
         self.subtitle = []
+        self.roles = []
         self.body = []
         self.footer = []
 
@@ -166,7 +167,7 @@ class RSTTranslator(nodes.NodeVisitor):
     # Helper methods
 
     def astext(self):
-        content = self.header + self.title + self.subtitle + self.body \
+        content = self.header + self.title + self.subtitle + self.roles + self.body \
             + self.footer
         return ''.join(content)
 
@@ -180,10 +181,13 @@ class RSTTranslator(nodes.NodeVisitor):
         self._indentation_levels.append(levels)
         self._indent_first_line.append(first_line)
 
-    def register_roles(self, roles):
-        for role in roles:
-            if role not in self.custom_roles:
-                self.custom_roles.append(role)
+    def register_role(self, role):
+        if role in self.custom_roles:
+            return
+        self.custom_roles.append(role)
+
+        text = '.. role:: %s\n' % role
+        self.roles.append(text)
 
     def render_buffer(self):
         """Append wrapped buffer to body."""
@@ -284,11 +288,7 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_document(self, node):
         if self.custom_roles:
-            self.custom_roles.sort(reverse=True)
-            self.body[0:0] = ['\n', '\n']
-            for role in self.custom_roles:
-                text = '.. role:: %s\n' % role
-                self.body[1:1] = text
+            self.roles.append('\n')
 
     def visit_emphasis(self, node):
         self.write_to_buffer('*')
@@ -298,7 +298,8 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def visit_inline(self, node):
         classes = node.get('classes', [])
-        self.register_roles(classes)
+        for role in classes:
+            self.register_role(role)
         classes = ' '.join(classes)
         self.write_to_buffer(':%s:`' % classes)
 
