@@ -336,6 +336,29 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_literal(self, node):
         self.write_to_buffer('``')
 
+    def visit_literal_block(self, node):
+        # @todo: Support parsed-literal blocks
+        # @todo: Support option "number-lines" and strip line numbers from the text
+        classes = node.get('classes', [])
+        if classes:
+            self.write_to_buffer('.. code:: %s' % classes[1])
+        else:
+            if self.body[-1][-2] == ':':
+                self.body[-1] = self.body[-1][:-2] + ':' + self.body[-1][-2:]
+                self.spacer = ''
+            else:
+                self.write_to_buffer('::')
+
+        self.render_buffer()
+        self.body.append(self.spacer)
+        self.spacer = '\n'
+
+        self.indent(2)
+        for line in node.astext().split('\n'):
+            self.body.append('%s%s\n' % (self.indentation, line))
+        self.dedent()
+        raise nodes.SkipNode
+
     def visit_math(self, node):
         self.write_to_buffer(':math:`')
 

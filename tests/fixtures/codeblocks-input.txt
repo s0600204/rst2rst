@@ -1,0 +1,58 @@
+
+reStructuredText supports code blocks, which produces output that is untouched and not line-wrapped.
+
+There are two ways these might be achieved, the first is to indicate with a double colon ("::"). This may be placed at the end of a line::
+
+  import sys
+  import time
+  print(f"Python {sys.version} (path: {sys.executable}; implementation: {sys.implementation.name}) running on {sys.platform} at {time.ctime()}.")
+
+Or on a line on its own...
+
+::
+
+  // javascript
+  const multi_indentation = {
+    'an_array': [
+      0, 2
+    ],
+    'an_object': {
+      'letter': 'w',
+      'number': 0,
+    },
+  }
+
+And if a space is given before the double-colon, it is removed from the parsed text, so must be restored when written back as ``rst`` ::
+
+  <?php
+  echo "Is this the real life; is this just fantasy?";
+  ?>
+
+The second way is to use the ``code`` directive, which has the added benefit of permitting the author to specify which language the code is in:
+
+.. code:: python
+
+  import rst2rst
+  # Rock Out!
+
+And finally:
+
+  Literal code blocks within an indented block comment, both with::
+
+    10 REM Basic code
+    20 PRINT "Hello, World!"
+    30 GOTO 20
+
+  And without a double-colon at the end
+
+  ::
+
+    body::after {
+      content: "Farewell, and thanks for all the fish!";
+    }
+
+  And lastly, with a directive:
+
+  .. code:: powershell
+
+    Write-Output("And now for something completely different.")
