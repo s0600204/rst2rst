@@ -16,6 +16,9 @@ documentations`_. See also the `original ticket`_.
 Testing
 *******
 
+.. Note:: Testing requires the optional ``docutils`` dependency `Pygments`_.
+          This is installed automatically when using ``tox``.
+
 To run tests, navigate to the tests subdirectory and run::
 
   python -u alltests.py
@@ -50,6 +53,7 @@ References
    http://documentation-style-guide-sphinx.readthedocs.org
 .. _`original ticket`:
    https://github.com/benoitbryon/documentation-style-guide-sphinx/issues/8
+.. _`Pygments`: https://pypi.org/project/Pygments/
 .. _`pyenv`: https://github.com/pyenv/pyenv
 .. _`tox`: https://tox.wiki/en/latest/index.html
 .. _`code repository`: https://github.com/benoitbryon/rst2rst

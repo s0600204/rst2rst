@@ -54,7 +54,7 @@ jobs:
 
     - name: Setup docutils
       run: |
-        pip install docutils==${{ matrix.docutils }}
+        pip install docutils==${{ matrix.docutils }} Pygments
 
     - name: Install package
       run: |
