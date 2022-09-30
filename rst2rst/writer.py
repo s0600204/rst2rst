@@ -239,19 +239,20 @@ class RSTTranslator(nodes.NodeVisitor):
         # Print anonymous targets first, hoisting any non-anonymous targets
         # with the same uri.
         skip_uris = []
-        for target_uri in self.external_targets['anonymous']:
+        for target_uri in sorted(self.external_targets['anonymous']):
             if target_uri in self.external_targets['named']:
                 skip_uris.append(target_uri)
-                for indirect_name in self.external_targets['named'][target_uri]:
+                for indirect_name in sorted(self.external_targets['named'][target_uri]):
                     self.body.append('.. _`%s`:\n' % indirect_name)
 
             self.body.append('.. __: %s\n' % target_uri)
 
         # Print remaining non-anonymous targets, using indirect references
         # where possible.
-        for target_uri, targets in self.external_targets['named'].items():
+        for target_uri in sorted(self.external_targets['named'].keys()):
             if target_uri in skip_uris:
                 continue
+            targets = sorted(self.external_targets['named'][target_uri])
             target_name = targets[0]
             self.body.append('.. _`%s`: %s\n' % (target_name, target_uri))
 

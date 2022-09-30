@@ -25,6 +25,6 @@ here's a `non-anonymous link`_ to the same location.
 
 .. _`non-anonymous link`:
 .. __: https://i.imgur.com/ai3dZzl.mp4
-.. _`python website`: https://python.org/
 .. _`external link`: https://pypi.org/project/docutils/
 .. _`indirect link`: _`external link`
+.. _`python website`: https://python.org/
