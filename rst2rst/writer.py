@@ -571,8 +571,12 @@ class RSTTranslator(nodes.NodeVisitor):
         refid = node.get('refid')
         if refid:
             ref_name = ''
+            if docutils.__version__ < '0.18.1':
+                findall_func = node.document.traverse # Deprecated in 0.18.1 onwards
+            else:
+                findall_func = node.document.findall
             # Find the name to use, as docutils doesn't pass it as part of the node.
-            for candidate in node.document.findall(condition=nodes.reference):
+            for candidate in findall_func(condition=nodes.reference):
                 candidate_refid = candidate.get('refid')
                 if candidate_refid and candidate_refid == refid:
                     ref_name = candidate.get('name')
