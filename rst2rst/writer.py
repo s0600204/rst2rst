@@ -147,6 +147,16 @@ class RSTTranslator(nodes.NodeVisitor):
         of a list and the next entry of its parent list.
         """
 
+        self.external_targets = {
+            'named': {},
+            'anonymous': [],
+        }
+        """Stores external targets and the link names that point to them.
+
+        These are then rendered at the end of a document, permitting indirect
+        links to be used instead of outputting the same URI repeatedly.
+        """
+
         self.buffer = []
         self.last_buffer_length = 0
 
@@ -219,6 +229,34 @@ class RSTTranslator(nodes.NodeVisitor):
         text = self.wrap(text) + '\n'
         self.body.append(text)
         self.buffer = []
+
+    def render_external_targets(self):
+        if not self.external_targets['anonymous'] and not self.external_targets['named']:
+            return
+
+        self.body.append('\n\n')
+
+        # Print anonymous targets first, hoisting any non-anonymous targets
+        # with the same uri.
+        skip_uris = []
+        for target_uri in self.external_targets['anonymous']:
+            if target_uri in self.external_targets['named']:
+                skip_uris.append(target_uri)
+                for indirect_name in self.external_targets['named'][target_uri]:
+                    self.body.append('.. _`%s`:\n' % indirect_name)
+
+            self.body.append('.. __: %s\n' % target_uri)
+
+        # Print remaining non-anonymous targets, using indirect references
+        # where possible.
+        for target_uri, targets in self.external_targets['named'].items():
+            if target_uri in skip_uris:
+                continue
+            target_name = targets[0]
+            self.body.append('.. _`%s`: %s\n' % (target_name, target_uri))
+
+            for indirect_name in targets[1:]:
+                self.body.append('.. _`%s`: _`%s`\n' % (indirect_name, target_name))
 
     def render_title_line(self, section_level, length):
         symbol = self.options.title_chars[section_level]
@@ -310,6 +348,7 @@ class RSTTranslator(nodes.NodeVisitor):
         pass
 
     def depart_document(self, node):
+        self.render_external_targets()
         if self.custom_roles:
             self.roles.append('\n')
 
@@ -465,6 +504,12 @@ class RSTTranslator(nodes.NodeVisitor):
     def visit_reference(self, node):
         refuri = node.get('refuri')
 
+        # Internal link
+        if not refuri:
+            self.write_to_buffer('`')
+            return
+
+        # External link
         pep_uri = self.document.settings.pep_base_url
         if refuri.startswith(pep_uri):
             pep_template = self.document.settings.pep_file_url_template
@@ -482,11 +527,15 @@ class RSTTranslator(nodes.NodeVisitor):
             self.write_to_buffer(':rfc-reference:`%s`' % rfc_num)
             raise nodes.SkipNode
 
-        # @todo: Save the reference uris so they can be enumerated in the footer or something.
-        self.write_to_buffer(':ref:`')
+        if node.get('name'):
+            # Text is not an explicitly given uri
+            self.write_to_buffer('`')
 
     def depart_reference(self, node):
-        self.write_to_buffer('`')
+        if not node.get('refuri') or node.get('name'):
+            self.write_to_buffer('`_')
+            if node.get('anonymous'):
+                self.write_to_buffer('_')
 
     def visit_section(self, node):
         self.section_level += 1
@@ -510,6 +559,53 @@ class RSTTranslator(nodes.NodeVisitor):
         self.write_to_buffer(':superscript:`')
 
     def depart_superscript(self, node):
+        self.write_to_buffer('`')
+
+    def visit_target(self, node):
+        # Internal inline target
+        if node.astext():
+            self.write_to_buffer('_`')
+            return
+
+        # Internal block target
+        refid = node.get('refid')
+        if refid:
+            ref_name = ''
+            # Find the name to use, as docutils doesn't pass it as part of the node.
+            for candidate in node.document.findall(condition=nodes.reference):
+                candidate_refid = candidate.get('refid')
+                if candidate_refid and candidate_refid == refid:
+                    ref_name = candidate.get('name')
+                    break;
+
+            if not ref_name:
+                # In the case that the internal target actually points to an
+                # external hyperlink target placed below it.
+                raise nodes.SkipNode
+
+            # Use buffer (instead of writing directly) to get indentation if set.
+            self.write_to_buffer(".. _`%s`:" % ref_name)
+            self.render_buffer()
+            raise nodes.SkipNode
+
+        # External target
+        refuri = node.get('refuri')
+        if node.get('anonymous'):
+            self.external_targets['anonymous'].append(refuri)
+
+        if refuri not in self.external_targets['named']:
+            self.external_targets['named'][refuri] = []
+        targets = self.external_targets['named'][refuri]
+
+        names = node.get('names')
+        for idx in range(len(names)):
+            if names[idx] in targets:
+                continue
+            targets.append(names[idx])
+        raise nodes.SkipNode
+
+    def depart_target(self, node):
+        # This is only called if this was an internal inline target.
         self.write_to_buffer('`')
 
     def visit_term(self, node):

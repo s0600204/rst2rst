@@ -1,0 +1,30 @@
+##########
+References
+##########
+
+The text of reStructuredText may contain `references`_ to various things. That
+right there was an internal link to the title of this document!
+
+This text contains both an `inline internal link`_ to and the _`inline internal
+link`'s target.
+
+.. _`inline target (with-hyphens)`:
+
+This text points to an `inline target (with-hyphens)`_, which has been placed
+above this paragraph.
+
+A link to an external resource may be expressed by giving the URI directly
+(https://pypi.org/), by expressing it with a name and uri (`python website`_),
+or by reference, such as `external link`_.
+
+There is also the ability to have an `indirect link`_.
+
+And finally, an `anonymous hyperlink`__. And, because we need to test it,
+here's a `non-anonymous link`_ to the same location.
+
+
+.. _`non-anonymous link`:
+.. __: https://i.imgur.com/ai3dZzl.mp4
+.. _`python website`: https://python.org/
+.. _`external link`: https://pypi.org/project/docutils/
+.. _`indirect link`: _`external link`
