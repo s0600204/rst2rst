@@ -1,0 +1,122 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  py_versions:
+    name: List available python3 versions
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install latest pyenv-action
+      uses: "gabrielfalcao/pyenv-action@master"
+
+    - name: Full version list
+      run: |
+        pyenv install --list | tr -d ' ' | grep ^3.
+
+    - name: Latest minor versions only
+      run: |
+        reduced=()
+        for version in `pyenv install --list | tr -d ' ' | grep ^3.`
+        do
+          # Skip 3.*-dev versions
+          if [ ${version:(-4)} = '-dev' ]; then
+            continue
+          fi
+          minor=`echo $version | cut -f2 -d'.' -`
+          reduced[$minor]=$version
+        done
+        echo ${reduced[*]}
+
+  tox:
+    name: Test with tox
+    runs-on: ubuntu-latest
+
+    env:
+      # 3.5.3 and below :: require OpenSSL 1.0; won't build with anything more recent
+      PYTHON_VERSIONS: >
+        3.11.0a7,
+        3.9.12,
+        3.8.13,
+        3.7.13,
+        3.6.15,
+        3.5.10,
+ 
+      # Despite it being documented as "optional", we need to specify a default python version.
+      #
+      # Make sure it isn't a duplicate of a version given in PYTHON_VERSIONS!
+      #   (https://github.com/gabrielfalcao/pyenv-action/issues/135)
+      DEFAULT_PYTHON: 3.10.4
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup pyenv
+      uses: "gabrielfalcao/pyenv-action@v10"
+      with:
+        versions: ${{ env.PYTHON_VERSIONS }}
+        default: ${{ env.DEFAULT_PYTHON }}
+        command: pip install -U pip
+
+    - name: Install tox
+      run: |
+        pip install tox
+
+    - name: Run tox
+      env:
+        TOX_PARALLEL_NO_SPINNER: 1
+      run: |
+        pyenv local $DEFAULT_PYTHON `echo $PYTHON_VERSIONS | tr -d ','`
+        tox --parallel
+
+  docutils_010-011:
+    # Test docutils 0.10 and 0.11 with python 3.7 and greater
+    # For some reason it is not possible to test these combinations via tox
+    #   (claims distutils is missing) but works fine when done as below.
+    name: docutils 0.10/0.11
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+        # 3.11.0a7 :: pyenv-action claims it isn't installed, despite pyenv seeming to install it without error
+        - 3.10.4
+        - 3.9.12
+        - 3.8.13
+        - 3.7.13
+        # 3.6.15 & 3.5.10 :: tested with tox
+
+        docutils:
+        - 0.11.0
+        - 0.10.0
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup pyenv
+      uses: "gabrielfalcao/pyenv-action@v10"
+      with:
+        default: ${{ matrix.python }}
+        command: pip install -U pip
+
+    - name: Setup docutils
+      run: |
+        pip install docutils==${{ matrix.docutils }} Pygments
+
+    - name: Install package
+      run: |
+        pip install .
+
+    - name: Execute tests
+      run: |
+        cd tests
+        python -u alltests.py
