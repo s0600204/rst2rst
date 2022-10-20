@@ -1,3 +1,8 @@
+::
+
+  This is a literal block with nothing before it in the document.
+  It should be output as such as well.
+
 reStructuredText supports code blocks, which produces output that is untouched
 and not line-wrapped.
 
@@ -39,6 +44,17 @@ permitting the author to specify which language the code is in:
 
   import rst2rst
   # Rock Out!
+
+We also need to test for what happens straight after a title header:
+
+
+*************
+Generic Title
+*************
+
+::
+
+  A literal code block straight after a header
 
 And finally:
 

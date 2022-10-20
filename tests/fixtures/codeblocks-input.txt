@@ -1,3 +1,7 @@
+::
+
+  This is a literal block with nothing before it in the document.
+  It should be output as such as well.
 
 reStructuredText supports code blocks, which produces output that is untouched and not line-wrapped.
 
@@ -34,6 +38,15 @@ The second way is to use the ``code`` directive, which has the added benefit of 
 
   import rst2rst
   # Rock Out!
+
+We also need to test for what happens straight after a title header:
+
+Generic Title
+#############
+
+::
+
+  A literal code block straight after a header
 
 And finally:
 

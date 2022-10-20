@@ -223,7 +223,9 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def render_buffer(self):
         """Append wrapped buffer to body."""
-        self.body.append(self.spacer)
+        if self.body:
+            # Don't need a spacer if this is the first thing to be rendered
+            self.body.append(self.spacer)
         text = ''.join(self.buffer)
         self.last_buffer_length = len(text)
         text = self.wrap(text) + '\n'
@@ -465,11 +467,12 @@ class RSTTranslator(nodes.NodeVisitor):
         if classes:
             self.write_to_buffer('.. code:: %s' % classes[1])
         else:
-            if self.body[-1][-2] == ':':
+            if self.body and len(self.body[-1]) > 1 and self.body[-1][-2] == ':':
                 self.body[-1] = self.body[-1][:-2] + ':' + self.body[-1][-2:]
                 self.spacer = ''
             else:
                 self.write_to_buffer('::')
+                self.spacer = '\n'
 
         self.render_buffer()
         self.body.append(self.spacer)
