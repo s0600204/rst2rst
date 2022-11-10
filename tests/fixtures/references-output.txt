@@ -20,12 +20,13 @@ or by reference, such as `external link`_.
 There is also the ability to have an `indirect link`_.
 
 And finally, an `anonymous hyperlink`__. And, because we need to test it,
-here's a `non-anonymous link`_ to the same location. We then have `another`__
-to the same location as before.
+here's a `non-anonymous link`_ to the same location. We then have an anonymous
+`link`__ somewhere else, then `another`__ to the same location as before.
 
 
 .. _`non-anonymous link`:
 .. __: https://i.imgur.com/ai3dZzl.mp4
+.. __: https://www.bbc.co.uk/
 .. __: https://i.imgur.com/ai3dZzl.mp4
 .. _`external link`: https://pypi.org/project/docutils/
 .. _`indirect link`: _`external link`
