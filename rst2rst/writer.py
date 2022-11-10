@@ -242,7 +242,7 @@ class RSTTranslator(nodes.NodeVisitor):
         # with the same uri.
         skip_uris = []
         for target_uri in sorted(self.external_targets['anonymous']):
-            if target_uri in self.external_targets['named']:
+            if target_uri in self.external_targets['named'] and target_uri not in skip_uris:
                 skip_uris.append(target_uri)
                 for indirect_name in sorted(self.external_targets['named'][target_uri]):
                     self.body.append('.. _`%s`:\n' % indirect_name)
