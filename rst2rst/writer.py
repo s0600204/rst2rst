@@ -163,6 +163,8 @@ class RSTTranslator(nodes.NodeVisitor):
         self.custom_roles = []
         self.ignore_inlines = False
 
+        self.table_buffer = None
+
     # Dynamic properties
 
     @property
@@ -231,6 +233,46 @@ class RSTTranslator(nodes.NodeVisitor):
         text = self.wrap(text) + '\n'
         self.body.append(text)
         self.buffer = []
+
+    def render_buffer_to_table(self):
+        col_idx = self.table_buffer['processing']['col']
+        row_idx = self.table_buffer['processing']['row']
+        wrapping = self.table_buffer['column_spec'][col_idx]['wrapping']
+
+        text = ''.join(self.buffer)
+        self.last_buffer_length = len(text)
+        text = self.wrap(text, wrapping)
+
+        self.table_buffer['content'][row_idx][col_idx] = text
+        self.buffer = []
+
+    def render_table(self):
+        if self.body:
+            # Don't need a spacer if this is the first thing to be rendered
+            self.body.append(self.spacer)
+
+        columns = self.table_buffer['column_spec']
+        column_count = len(columns)
+        self.render_table_hline(False)
+
+        rows = self.table_buffer['content']
+        for row_idx in range(len(rows)):
+            row = rows[row_idx]
+            row_out = '|'
+            for col_idx in range(column_count):
+                cell = row[col_idx]
+                rpad = ' ' * (columns[col_idx]['wrapping'] - len(cell))
+                row_out += f" {cell}{rpad} |"
+                
+            self.body.append(row_out + "\n")
+            self.render_table_hline(self.table_buffer['heading_length'] == row_idx)
+
+    def render_table_hline(self, double = False):
+        dash = '=' if double else '-'
+        hline = '+'
+        for column in self.table_buffer['column_spec']:
+            hline += dash * column['width'] + '+'
+        self.body.append(hline + "\n")
 
     def render_external_targets(self):
         if not self.external_targets['anonymous'] and not self.external_targets['named']:
@@ -330,6 +372,13 @@ class RSTTranslator(nodes.NodeVisitor):
     def depart_classifier(self, node):
         pass
 
+    def visit_colspec(self, node):
+        self.table_buffer['column_spec'].append({
+            'width': node['colwidth'],
+            'wrapping': node['colwidth'] - 2,
+        })
+        raise nodes.SkipNode
+
     def visit_definition(self, node):
         self.render_buffer()
         self.spacer = ''
@@ -360,6 +409,13 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_emphasis(self, node):
         self.write_to_buffer('*')
+
+    def visit_entry(self, node):
+        self.table_buffer['processing']['col'] += 1
+
+    def depart_entry(self, node):
+        if 'morecols' in node:
+            self.table_buffer['processing']['col'] += node['morecols']
 
     def visit_enumerated_list(self, node):
         self.body.append(self.spacer)
@@ -501,7 +557,10 @@ class RSTTranslator(nodes.NodeVisitor):
             self.write_to_buffer('\\')
 
     def depart_paragraph(self, node):
-        self.render_buffer()
+        if self.table_buffer:
+            self.render_buffer_to_table()
+        else:
+            self.render_buffer()
         self.spacer = '\n'
         self._indent_first_line[-1] = None
 
@@ -541,6 +600,15 @@ class RSTTranslator(nodes.NodeVisitor):
             if node.get('anonymous'):
                 self.write_to_buffer('_')
 
+    def visit_row(self, node):
+        self.table_buffer['processing']['row'] += 1
+        self.table_buffer['processing']['col'] = -1
+        self.table_buffer['content'].append([""] * len(self.table_buffer['column_spec']))
+
+    def depart_row(self, node):
+        if self.table_buffer['processing']['is_header']:
+            self.table_buffer['heading_length'] += 1
+
     def visit_section(self, node):
         self.section_level += 1
 
@@ -564,6 +632,21 @@ class RSTTranslator(nodes.NodeVisitor):
 
     def depart_superscript(self, node):
         self.write_to_buffer('`')
+
+    def visit_table(self, node):
+        self.table_buffer = {
+            'content': [],
+            'column_spec': [],
+            'heading_length': -1,
+            'processing': {
+                'col': -1,
+                'row': -1,
+                'is_header': False,
+            }
+        }
+
+    def depart_table(self, node):
+        self.render_table()
 
     def visit_target(self, node):
         # Internal inline target
@@ -616,11 +699,29 @@ class RSTTranslator(nodes.NodeVisitor):
         # This is only called if this was an internal inline target.
         self.write_to_buffer('`')
 
+    def visit_tbody(self, node):
+        pass
+
+    def depart_tbody(self, node):
+        pass
+
     def visit_term(self, node):
         pass
 
     def depart_term(self, node):
         pass
+
+    def visit_tgroup(self, node):
+        pass
+
+    def depart_tgroup(self, node):
+        pass
+
+    def visit_thead(self, node):
+        self.table_buffer['processing']['is_header'] = True
+
+    def depart_thead(self, node):
+        self.table_buffer['processing']['is_header'] = False
 
     def visit_title(self, node):
         pass
