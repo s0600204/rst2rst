@@ -241,7 +241,7 @@ class RSTTranslator(nodes.NodeVisitor):
 
         text = ''.join(self.buffer)
         self.last_buffer_length = len(text)
-        text = self.wrap(text, wrapping)
+        text = self.wrap(text, wrapping).split('\n')
 
         self.table_buffer['content'][row_idx][col_idx] = text
         self.buffer = []
@@ -258,13 +258,20 @@ class RSTTranslator(nodes.NodeVisitor):
         rows = self.table_buffer['content']
         for row_idx in range(len(rows)):
             row = rows[row_idx]
-            row_out = '|'
-            for col_idx in range(column_count):
-                cell = row[col_idx]
-                rpad = ' ' * (columns[col_idx]['wrapping'] - len(cell))
-                row_out += f" {cell}{rpad} |"
-                
-            self.body.append(row_out + "\n")
+
+            line_count = 0
+            for cell in row:
+                line_count = max(line_count, len(cell))
+
+            for line_idx in range(line_count):
+                line_out = '|'
+                for col_idx in range(column_count):
+                    cell = row[col_idx]
+                    line = cell[line_idx] if len(cell) > line_idx else ''
+                    rpad = ' ' * (columns[col_idx]['wrapping'] - len(line))
+                    line_out += f" {line}{rpad} |"
+                self.body.append(line_out + "\n")
+
             self.render_table_hline(self.table_buffer['heading_length'] == row_idx)
 
     def render_table_hline(self, double = False):
