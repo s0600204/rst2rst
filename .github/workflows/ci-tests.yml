@@ -8,58 +8,80 @@ on:
   workflow_dispatch:
 
 jobs:
-  py_versions:
-    name: List available python3 versions
-    runs-on: ubuntu-latest
+  tox_py35-36:
+    name: Test with tox (python 3.5/3.6)
+    runs-on: ubuntu-20.04
 
-    steps:
-    - name: Install latest pyenv-action
-      uses: "gabrielfalcao/pyenv-action@master"
+    # PYTHON 3.5
+    # """"""""""
+    #
+    # (3.5.3 and below require OpenSSL 1.0; won't build with anything more recent.)
+    #
+    # The installation of Python 3.5.4+ on Ubuntu 22.04 succeeds, however all tests with tox
+    # then fail. It is unclear at this time as to why, as logs are not helpful.
 
-    - name: Full version list
-      run: |
-        pyenv install --list | tr -d ' ' | grep ^3.
-
-    - name: Latest minor versions only
-      run: |
-        reduced=()
-        for version in `pyenv install --list | tr -d ' ' | grep ^3.`
-        do
-          # Skip 3.*-dev versions
-          if [ ${version:(-4)} = '-dev' ]; then
-            continue
-          fi
-          minor=`echo $version | cut -f2 -d'.' -`
-          reduced[$minor]=$version
-        done
-        echo ${reduced[*]}
-
-  tox:
-    name: Test with tox
-    runs-on: ubuntu-latest
-
-    env:
-      # 3.5.3 and below :: require OpenSSL 1.0; won't build with anything more recent
-      PYTHON_VERSIONS: >
-        3.11.0a7,
-        3.9.12,
-        3.8.13,
-        3.7.13,
-        3.6.15,
-        3.5.10,
- 
-      # Despite it being documented as "optional", we need to specify a default python version.
-      #
-      # Make sure it isn't a duplicate of a version given in PYTHON_VERSIONS!
-      #   (https://github.com/gabrielfalcao/pyenv-action/issues/135)
-      DEFAULT_PYTHON: 3.10.4
+    # PYTHON 3.6
+    # """"""""""
+    #
+    # Installation of Python 3.6 on Ubuntu 22.04 fails.
+    #
+    # It appears that this is due to an issue between python 3.6 and gcc > v10:
+    #     https://github.com/pyenv/pyenv/issues/1889#issuecomment-837697366
+    #
+    # There are three ways around it:
+    #
+    # 1. Use Ubuntu 22.04;
+    # 2. Use clang instead of GCC;
+    # 3. Apply a patch provided on the above Bug Report
+    #
+    # We're using solution #1.
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Setup pyenv
-      uses: "gabrielfalcao/pyenv-action@v10"
+      uses: "gabrielfalcao/pyenv-action@v11"
+      with:
+        versions: 3.5.10
+        default: 3.6.15
+        command: pip install -U pip
+
+    - name: Install tox
+      run: |
+        pip install tox
+
+    - name: Run tox
+      env:
+        TOX_PARALLEL_NO_SPINNER: 1
+      run: |
+        pyenv local 3.6.15 3.5.10
+        tox --parallel
+
+  tox_py37-plus:
+    name: Test with tox (python 3.7+)
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHON_VERSIONS: >
+        3.12.0a2,
+        3.10.8,
+        3.9.15,
+        3.8.15,
+        3.7.15,
+
+      # Despite it being documented as "optional", we need to specify a default python version.
+      #
+      # Make sure it isn't a duplicate of a version given in PYTHON_VERSIONS!
+      #   (https://github.com/gabrielfalcao/pyenv-action/issues/135)
+      DEFAULT_PYTHON: 3.11.0
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup pyenv
+      uses: "gabrielfalcao/pyenv-action@v11"
       with:
         versions: ${{ env.PYTHON_VERSIONS }}
         default: ${{ env.DEFAULT_PYTHON }}
@@ -77,22 +99,23 @@ jobs:
         tox --parallel
 
   docutils_010-011:
+    name: docutils 0.10/0.11
+    runs-on: ubuntu-latest
+
     # Test docutils 0.10 and 0.11 with python 3.7 and greater
     # For some reason it is not possible to test these combinations via tox
     #   (claims distutils is missing) but works fine when done as below.
-    name: docutils 0.10/0.11
-    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         python:
-        # 3.11.0a7 :: pyenv-action claims it isn't installed, despite pyenv seeming to install it without error
-        - 3.10.4
-        - 3.9.12
-        - 3.8.13
-        - 3.7.13
-        # 3.6.15 & 3.5.10 :: tested with tox
+        # 3.12.0a2 :: pyenv-action claims it isn't installed, despite pyenv seeming to install it without error
+        # 3.11.0   :: Claims distutils missing
+        - 3.10.5 # :: Newer versions of 3.10.x fail to install, claiming distutils missing
+        - 3.9.15
+        - 3.8.15
+        - 3.7.15
 
         docutils:
         - 0.11.0
@@ -103,7 +126,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Setup pyenv
-      uses: "gabrielfalcao/pyenv-action@v10"
+      uses: "gabrielfalcao/pyenv-action@v11"
       with:
         default: ${{ matrix.python }}
         command: pip install -U pip

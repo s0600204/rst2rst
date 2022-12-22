@@ -1,0 +1,92 @@
+name: Python Versions
+
+# This lists the versions of python available via pyenv
+# for various versions of the pyenv-action workflow.
+#
+# It seems that passing a matrix'd value to "uses"...
+# ```
+#   uses: "gabrielfalcao/pyenv-action@${{matrix.pyenv}}"
+# ```
+# ...is not possible. Thus the duplication of steps.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  py_versions_main:
+    name: List available python3 versions (main)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install pyenv-action
+      uses: "gabrielfalcao/pyenv-action@main"
+
+    - name: Full version list
+      run: |
+        pyenv install --list | tr -d ' ' | grep ^3.
+
+    - name: Latest minor versions only
+      run: |
+        reduced=()
+        for version in `pyenv install --list | tr -d ' ' | grep ^3.`
+        do
+          # Skip 3.*-dev versions
+          if [ ${version:(-4)} = '-dev' ]; then
+            continue
+          fi
+          minor=`echo $version | cut -f2 -d'.' -`
+          reduced[$minor]=$version
+        done
+        echo ${reduced[*]}
+
+  py_versions_v11:
+    name: List available python3 versions (v11)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install pyenv-action
+      uses: "gabrielfalcao/pyenv-action@v11"
+
+    - name: Full version list
+      run: |
+        pyenv install --list | tr -d ' ' | grep ^3.
+
+    - name: Latest minor versions only
+      run: |
+        reduced=()
+        for version in `pyenv install --list | tr -d ' ' | grep ^3.`
+        do
+          # Skip 3.*-dev versions
+          if [ ${version:(-4)} = '-dev' ]; then
+            continue
+          fi
+          minor=`echo $version | cut -f2 -d'.' -`
+          reduced[$minor]=$version
+        done
+        echo ${reduced[*]}
+
+  py_versions_v10:
+    name: List available python3 versions (v10)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install pyenv-action
+      uses: "gabrielfalcao/pyenv-action@v10"
+
+    - name: Full version list
+      run: |
+        pyenv install --list | tr -d ' ' | grep ^3.
+
+    - name: Latest minor versions only
+      run: |
+        reduced=()
+        for version in `pyenv install --list | tr -d ' ' | grep ^3.`
+        do
+          # Skip 3.*-dev versions
+          if [ ${version:(-4)} = '-dev' ]; then
+            continue
+          fi
+          minor=`echo $version | cut -f2 -d'.' -`
+          reduced[$minor]=$version
+        done
+        echo ${reduced[*]}
