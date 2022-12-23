@@ -27,3 +27,5 @@ What follows are simple grid tables:
 | Cell 3       | Cell 4 with  |
 |              | wrapped text |
 +--------------+--------------+
+
+And then some random text at the end.

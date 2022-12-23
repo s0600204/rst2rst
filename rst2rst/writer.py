@@ -274,6 +274,9 @@ class RSTTranslator(nodes.NodeVisitor):
 
             self.render_table_hline(self.table_buffer['heading_length'] == row_idx)
 
+        # Clear table buffer
+        self.table_buffer = None
+
     def render_table_hline(self, double = False):
         dash = '=' if double else '-'
         hline = '+'
