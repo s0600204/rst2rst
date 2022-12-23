@@ -269,7 +269,7 @@ class RSTTranslator(nodes.NodeVisitor):
                     cell = row[col_idx]
                     line = cell[line_idx] if len(cell) > line_idx else ''
                     rpad = ' ' * (columns[col_idx]['wrapping'] - len(line))
-                    line_out += f" {line}{rpad} |"
+                    line_out += " %s%s |" % (line, rpad)
                 self.body.append(line_out + "\n")
 
             self.render_table_hline(self.table_buffer['heading_length'] == row_idx)
