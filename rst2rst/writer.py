@@ -237,7 +237,11 @@ class RSTTranslator(nodes.NodeVisitor):
     def render_buffer_to_table(self):
         col_idx = self.table_buffer['processing']['col']
         row_idx = self.table_buffer['processing']['row']
-        wrapping = self.table_buffer['column_spec'][col_idx]['wrapping']
+        if 'wrapping' in self.table_buffer['column_spec'][col_idx]:
+            wrapping = self.table_buffer['column_spec'][col_idx]['wrapping']
+        else:
+            column_count = len(self.table_buffer['column_spec'])
+            wrapping = int((self.options.wrap_length - 1) / column_count) - 3
 
         text = ''.join(self.buffer)
         self.last_buffer_length = len(text)
@@ -251,11 +255,23 @@ class RSTTranslator(nodes.NodeVisitor):
             # Don't need a spacer if this is the first thing to be rendered
             self.body.append(self.spacer)
 
-        columns = self.table_buffer['column_spec']
-        column_count = len(columns)
-        self.render_table_hline(False)
-
         rows = self.table_buffer['content']
+        columns = self.table_buffer['column_spec']
+
+        column_count = len(columns)
+        column_wrapping = []
+        for col_idx in range(column_count):
+            if 'wrapping' in columns[col_idx]:
+                column_wrapping += [columns[col_idx]['wrapping']]
+            else:
+                column_wrapping += [0]
+                for row in rows:
+                    cell = row[col_idx]
+                    for line in cell:
+                        column_wrapping[col_idx] = max(column_wrapping[col_idx], len(line))
+
+        self.render_table_hline(column_wrapping, False)
+
         for row_idx in range(len(rows)):
             row = rows[row_idx]
 
@@ -268,20 +284,22 @@ class RSTTranslator(nodes.NodeVisitor):
                 for col_idx in range(column_count):
                     cell = row[col_idx]
                     line = cell[line_idx] if len(cell) > line_idx else ''
-                    rpad = ' ' * (columns[col_idx]['wrapping'] - len(line))
+                    rpad = ' ' * (column_wrapping[col_idx] - len(line))
                     line_out += " %s%s |" % (line, rpad)
                 self.body.append(line_out + "\n")
 
-            self.render_table_hline(self.table_buffer['heading_length'] == row_idx)
+            self.render_table_hline(
+                column_wrapping,
+                self.table_buffer['heading_length'] == row_idx)
 
         # Clear table buffer
         self.table_buffer = None
 
-    def render_table_hline(self, double = False):
+    def render_table_hline(self, column_wrapping, double = False):
         dash = '=' if double else '-'
         hline = '+'
-        for column in self.table_buffer['column_spec']:
-            hline += dash * column['width'] + '+'
+        for wrapping_width in column_wrapping:
+            hline += dash * (wrapping_width + 2) + '+'
         self.body.append(hline + "\n")
 
     def render_external_targets(self):
@@ -383,10 +401,13 @@ class RSTTranslator(nodes.NodeVisitor):
         pass
 
     def visit_colspec(self, node):
-        self.table_buffer['column_spec'].append({
-            'width': node['colwidth'],
-            'wrapping': node['colwidth'] - 2,
-        })
+        if 'colwidth' in node:
+            self.table_buffer['column_spec'].append({
+                'width': node['colwidth'],
+                'wrapping': node['colwidth'] - 2,
+            })
+        else:
+            self.table_buffer['column_spec'].append({})
         raise nodes.SkipNode
 
     def visit_definition(self, node):
