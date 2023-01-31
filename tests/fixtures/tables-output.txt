@@ -23,6 +23,7 @@ What follows are simple grid tables:
 +==============+==============+
 | Cell 1 with  | Cell 2       |
 | wrapped text |              |
+|              | Second line  |
 +--------------+--------------+
 | Cell 3       | Cell 4 with  |
 |              | wrapped text |

@@ -247,7 +247,10 @@ class RSTTranslator(nodes.NodeVisitor):
         self.last_buffer_length = len(text)
         text = self.wrap(text, wrapping).split('\n')
 
-        self.table_buffer['content'][row_idx][col_idx] = text
+        if self.table_buffer['content'][row_idx][col_idx]:
+            self.table_buffer['content'][row_idx][col_idx] += [""]
+        self.table_buffer['content'][row_idx][col_idx] += text
+
         self.buffer = []
 
     def render_table(self):
@@ -634,7 +637,7 @@ class RSTTranslator(nodes.NodeVisitor):
     def visit_row(self, node):
         self.table_buffer['processing']['row'] += 1
         self.table_buffer['processing']['col'] = -1
-        self.table_buffer['content'].append([""] * len(self.table_buffer['column_spec']))
+        self.table_buffer['content'].append([[] for i in range(len(self.table_buffer['column_spec']))])
 
     def depart_row(self, node):
         if self.table_buffer['processing']['is_header']:
