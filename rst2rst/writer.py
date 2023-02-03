@@ -553,6 +553,7 @@ class RSTTranslator(nodes.NodeVisitor):
     def visit_literal_block(self, node):
         # @todo: Support parsed-literal blocks
         # @todo: Support option "number-lines" and strip line numbers from the text
+        # @todo: Check that line lengths don't exceed column width if table_buffer has no column widths set
         classes = node.get('classes', [])
         if classes:
             self.write_to_buffer('.. code:: %s' % classes[1])
@@ -564,13 +565,22 @@ class RSTTranslator(nodes.NodeVisitor):
                 self.write_to_buffer('::')
                 self.spacer = '\n'
 
-        self.render_buffer()
-        self.body.append(self.spacer)
+        if self.table_buffer:
+            self.render_buffer_to_table()
+            col_idx = self.table_buffer['processing']['col']
+            row_idx = self.table_buffer['processing']['row']
+            self.table_buffer['content'][row_idx][col_idx] += [""]
+        else:
+            self.render_buffer()
+            self.body.append(self.spacer)
         self.spacer = '\n'
 
         self.indent(2)
         for line in node.astext().split('\n'):
-            self.body.append('%s%s\n' % (self.indentation, line))
+            if self.table_buffer:
+                self.table_buffer['content'][row_idx][col_idx].append('%s%s' % (self.indentation, line))
+            else:
+                self.body.append('%s%s\n' % (self.indentation, line))
         self.dedent()
         raise nodes.SkipNode
 

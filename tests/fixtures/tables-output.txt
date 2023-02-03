@@ -29,4 +29,22 @@ What follows are simple grid tables:
 |              | wrapped text |
 +--------------+--------------+
 
++---------------------+-----------------------+
+| Left-side Header    | Right-side Header     |
++=====================+=======================+
+| ::                  | Plain text in Cell 2  |
+|                     |                       |
+|   a_function () {   |                       |
+|     echo "Hello";   |                       |
+|   }                 |                       |
++---------------------+-----------------------+
+| Plain text in cell  | Start with plain text |
+| 3                   |                       |
+|                     | ::                    |
+|                     |                       |
+|                     |   b_function () {}    |
+|                     |                       |
+|                     | Back to plain text    |
++---------------------+-----------------------+
+
 And then some random text at the end.
