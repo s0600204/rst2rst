@@ -267,6 +267,7 @@ class RSTTranslator(nodes.NodeVisitor):
 
         rows = self.table_buffer['content']
         columns = self.table_buffer['column_spec']
+        indent = self.options.indentation_char * self.table_buffer['table_indent']
 
         column_count = len(columns)
         column_wrapping = []
@@ -280,7 +281,7 @@ class RSTTranslator(nodes.NodeVisitor):
                     for line in cell:
                         column_wrapping[col_idx] = max(column_wrapping[col_idx], len(line))
 
-        self.render_table_hline(column_wrapping, False)
+        self.render_table_hline(indent, column_wrapping, False)
 
         for row_idx in range(len(rows)):
             row = rows[row_idx]
@@ -290,7 +291,7 @@ class RSTTranslator(nodes.NodeVisitor):
                 line_count = max(line_count, len(cell))
 
             for line_idx in range(line_count):
-                line_out = '|'
+                line_out = '%s|' % indent
                 for col_idx in range(column_count):
                     cell = row[col_idx]
                     line = cell[line_idx] if len(cell) > line_idx else ''
@@ -299,15 +300,19 @@ class RSTTranslator(nodes.NodeVisitor):
                 self.body.append(line_out + "\n")
 
             self.render_table_hline(
+                indent,
                 column_wrapping,
                 self.table_buffer['heading_length'] == row_idx)
+
+        # Restore indentation settings
+        self._indentation_levels = self.table_buffer['indentation_level_cache']
 
         # Clear table buffer
         self.table_buffer = None
 
-    def render_table_hline(self, column_wrapping, double = False):
+    def render_table_hline(self, indent, column_wrapping, double = False):
         dash = '=' if double else '-'
-        hline = '+'
+        hline = '%s+' % indent
         for wrapping_width in column_wrapping:
             hline += dash * (wrapping_width + 2) + '+'
         self.body.append(hline + "\n")
@@ -693,8 +698,14 @@ class RSTTranslator(nodes.NodeVisitor):
                 'col': -1,
                 'row': -1,
                 'is_header': False,
-            }
+            },
+            'indentation_level_cache': None,
+            'table_indent': self.indentation_length,
         }
+
+        # Save current indentation
+        self.table_buffer['indentation_level_cache'] = self._indentation_levels
+        self._indentation_levels = []
 
     def depart_table(self, node):
         self.render_table()

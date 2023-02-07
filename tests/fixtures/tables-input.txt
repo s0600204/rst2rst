@@ -48,4 +48,18 @@ What follows are simple grid tables:
 |                     | Back to plain text    |
 +---------------------+-----------------------+
 
+Then we can have some indented tables...
+
+  +-------------+--------------+
+  | Left Header | Right Header |
+  +=============+==============+
+  | Cell 1      | Cell 2a      |
+  |             |              |
+  |             | Cell 2b      |
+  +-------------+--------------+
+  | **Cell 3a** | ::           |
+  |             |              |
+  |   *Cell 3b* |   Cell 4     |
+  +-------------+--------------+
+
 And then some random text at the end.
