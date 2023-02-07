@@ -178,7 +178,12 @@ class RSTTranslator(nodes.NodeVisitor):
     @property
     def indentation(self):
         """Return current indentation as unicode."""
-        return self.options.indentation_char * sum(self._indentation_levels)
+        return self.options.indentation_char * self.indentation_length
+
+    @property
+    def indentation_length(self):
+        """Return length of current indentation."""
+        return sum(self._indentation_levels)
 
     @property
     def indentation_level(self):
@@ -241,7 +246,9 @@ class RSTTranslator(nodes.NodeVisitor):
             wrapping = self.table_buffer['column_spec'][col_idx]['wrapping']
         else:
             column_count = len(self.table_buffer['column_spec'])
-            wrapping = int((self.options.wrap_length - 1) / column_count) - 3
+            wrapping = int(
+                (self.options.wrap_length - self.indentation_length - 1) / column_count
+            ) - 3
 
         text = ''.join(self.buffer)
         self.last_buffer_length = len(text)
