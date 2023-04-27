@@ -1,0 +1,15 @@
+--- a/rst2rst/writer.py
++++ b/rst2rst/writer.py
+@@ -8,11 +8,11 @@ import docutils
+ from docutils import frontend, nodes, utils, writers, languages, io
+ from docutils.parsers.rst.states import Inliner
+ from docutils.transforms import writer_aux
+-from docutils.utils import roman
+ from docutils.utils.error_reporting import SafeString
+ from docutils.utils.math import unichar2tex, pick_math_environment
+ from docutils.utils.math.latex2mathml import parse_latex_math
+ from docutils.utils.math.math2html import math2html
++import roman
+ 
+ 
+ class Options(object):

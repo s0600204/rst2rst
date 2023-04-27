@@ -1,0 +1,20 @@
+--- a/setup.py
++++ b/setup.py
+@@ -14,7 +14,7 @@ def read_relative_file(filename):
+ NAME = 'rst2rst'
+ README = read_relative_file('README.rst')
+ VERSION = read_relative_file(os.path.join(NAME, 'version.txt')).strip()
+-PACKAGES = [NAME]
++PACKAGES = [NAME, "%s.scripts" % NAME, "%s.utils" % NAME]
+ REQUIRES = ['setuptools', 'docutils>=0.10']
+ ENTRY_POINTS = {
+     'console_scripts': [
+@@ -46,7 +46,7 @@ if __name__ == '__main__':  # Don't run setup() when we import this module.
+           author_email='benoit@marmelune.net',
+           url='https://github.com/benoitbryon/%s' % NAME,
+           license='BSD',
+-          packages=[NAME],
++          packages=PACKAGES,
+           include_package_data=True,
+           zip_safe=False,
+           python_requires='>=3.5.4',

@@ -1,0 +1,22 @@
+Source: rst2rst
+Section: python
+Priority: optional
+Maintainer: s0600204 <dev@s0600204>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ pybuild-plugin-pyproject,
+ python3-all,
+ python3-docutils,
+ python3-pygments,
+ python3-setuptools
+Standards-Version: 4.6.2
+Homepage: https://github.com/s0600204/rst2rst.git
+
+Package: python3-rst2rst
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends}
+Description: Docutils to reStructuredText
+ Permits converting a docutils document tree to reStructuredText
