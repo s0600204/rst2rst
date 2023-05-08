@@ -5,7 +5,7 @@ jobs:
   build:
 
     docker:
-    - image: debian:bullseye-backports
+    - image: debian:bookworm-slim
 
     resource_class: small
 
@@ -20,6 +20,13 @@ jobs:
     - run: >
         echo 'APT::Get::Assume-Yes "true";'     > /etc/apt/apt.conf.d/AssumeYes;
         echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/NeverRecommend
+    # >> Configure mirror
+    #    (A *.list file isn't part of the bookworm docker image, but is required by pbuilder)
+    #    (Known bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1032153)
+    - run: >
+        echo "deb http://deb.debian.org/debian          bookworm main"          >> /etc/apt/sources.list.d/bookworm.list;
+        echo "deb http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/bookworm.list;
+        echo "deb http://deb.debian.org/debian          bookworm-updates main"  >> /etc/apt/sources.list.d/bookworm.list
     # >> Update apt
     - run:
         apt-get update && apt-get upgrade
@@ -29,6 +36,9 @@ jobs:
     # >> debian packaging
     - run:
         apt-get install build-essential debhelper devscripts git-buildpackage
+    # >> build file parsing
+    #    (Requires bookworm or better)
+    - run: apt-get install -y yq
 
     ## Checkout code
     - checkout
@@ -36,13 +46,8 @@ jobs:
         git checkout debian
 
     ## Install specific build requirements
-    - run: >
-        apt-get install -t bullseye-backports
-        pybuild-plugin-pyproject
-        python3-all
-        python3-docutils
-        python3-pygments
-        python3-setuptools
+    - run:
+        apt-get install `yq '.["Build-Depends"]' debian/control | cut -f2- -d, | tr ",\"" " "`
 
     ## Build
     - run:
