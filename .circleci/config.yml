@@ -1,0 +1,53 @@
+version: 2.1
+
+jobs:
+
+  build:
+
+    docker:
+    - image: debian:bullseye-backports
+
+    resource_class: small
+
+    working_directory: /mnt/ramdisk
+
+    steps:
+
+    ## Install general requirements
+    # >> Configure apt
+    #    * Say "yes" automatically
+    #    * Never want to install "Recommended" packages
+    - run: >
+        echo 'APT::Get::Assume-Yes "true";'     > /etc/apt/apt.conf.d/AssumeYes;
+        echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/NeverRecommend
+    # >> Update apt
+    - run:
+        apt-get update && apt-get upgrade
+    # >> CircleCI requirements
+    - run:
+        apt-get install git
+    # >> debian packaging
+    - run:
+        apt-get install build-essential debhelper devscripts git-buildpackage
+
+    ## Checkout code
+    - checkout
+    - run:
+        git checkout debian
+
+    ## Install specific build requirements
+    - run: >
+        apt-get install -t bullseye-backports
+        pybuild-plugin-pyproject
+        python3-all
+        python3-docutils
+        python3-pygments
+        python3-setuptools
+
+    ## Build
+    - run:
+        gbp buildpackage
+
+    ## Upload
+    - store_artifacts:
+        path: debian/build
