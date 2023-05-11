@@ -20,13 +20,6 @@ jobs:
     - run: >
         echo 'APT::Get::Assume-Yes "true";'     > /etc/apt/apt.conf.d/AssumeYes;
         echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/NeverRecommend
-    # >> Configure mirror
-    #    (A *.list file isn't part of the bookworm docker image, but is required by pbuilder)
-    #    (Known bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1032153)
-    - run: >
-        echo "deb http://deb.debian.org/debian          bookworm main"          >> /etc/apt/sources.list.d/bookworm.list;
-        echo "deb http://deb.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list.d/bookworm.list;
-        echo "deb http://deb.debian.org/debian          bookworm-updates main"  >> /etc/apt/sources.list.d/bookworm.list
     # >> Update apt
     - run:
         apt-get update && apt-get upgrade
