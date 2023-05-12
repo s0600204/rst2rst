@@ -5,7 +5,7 @@ jobs:
   build:
 
     docker:
-    - image: debian:bookworm-slim
+    - image: s0600204/dpkg-build
 
     resource_class: small
 
@@ -13,38 +13,25 @@ jobs:
 
     steps:
 
-    ## Install general requirements
-    # >> Configure apt
-    #    * Say "yes" automatically
-    #    * Never want to install "Recommended" packages
-    - run: >
-        echo 'APT::Get::Assume-Yes "true";'     > /etc/apt/apt.conf.d/AssumeYes;
-        echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/NeverRecommend
-    # >> Update apt
-    - run:
-        apt-get update && apt-get upgrade
-    # >> CircleCI requirements
-    - run:
-        apt-get install git
-    # >> debian packaging
-    - run:
-        apt-get install build-essential debhelper devscripts git-buildpackage
-    # >> build file parsing
-    #    (Requires bookworm or better)
-    - run: apt-get install -y yq
-
     ## Checkout code
     - checkout
     - run:
-        git checkout debian
+        name: Switch branch
+        command: |
+          git checkout debian
 
-    ## Install specific build requirements
+    ## Install build dependencies
     - run:
-        apt-get install `yq '.["Build-Depends"]' debian/control | cut -f2- -d, | tr ",\"" " "`
+        name: Install build dependencies
+        command: |
+          apt-get update
+          apt-get install `ddepextract`
 
     ## Build
     - run:
-        gbp buildpackage
+        name: Build package
+        command: |
+          gbp buildpackage
 
     ## Upload
     - store_artifacts:
